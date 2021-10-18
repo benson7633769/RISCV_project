@@ -1,0 +1,62 @@
+.data
+argument .word   7               # n=7
+str1     .string Number 
+str2     .string  is a power of 4
+str3     .string  is not a power of 4
+
+.text
+main
+        lw  a0, argument   # Load argument from static data
+        jal ra, isPowerOfFour  # Jump-and-link to the 'isPowerOfFour' label
+        jal ra, printResult    # Jump-and-link to the 'printResult' label
+
+
+
+        # Exit program
+        li a7, 10
+        ecall
+
+isPowerOfFour
+        addi sp, sp, -4              # 空出stack空間
+        sw   a0, 0(sp)		     # 將n存回memory，因為之後n會動到
+        addi t3, t3, 1               # 用一REG裝1
+        beq  a0, t3 , true           # if n==1 , TRUE
+        beq  a0, zero , false        # if n==0 , FALSE
+        blt  a0, zero , false        # if n0 , FALSE
+loop                                # while loop
+        andi t4 , a0 , 3             # n % 4 
+        bne  t4,zero,false           # if(n%4) != 0 , FALSE
+        srli a0,a0,2                 # n=n4
+        beq  a0,t3,true              # while 判斷條件
+        j loop
+true     
+        addi  t5, t5 , 1             # 以1代表TRUE
+        j res
+false
+        addi  t5, t5 , 0             # 以0代表TRUE
+res
+        addi a1,t5,0                 # 回傳值放01
+        lw   a0, 0(sp)               # 還回stack
+        addi sp, sp, 4
+        jr ra                        # return
+     
+printResult
+        mv t0, a0                    # t0 = n
+        mv t1, a1                    # t1 = TRUEFALSE 
+        la a0, str1                 
+        li a7, 4		
+        ecall                        # print str1
+        mv a0, t0
+        li a7, 1
+        ecall                        # print t0
+        beq t1, zero, f
+        la a0, str2
+        li a7, 4
+        ecall                        # print str2
+        ret        
+f
+        la a0, str3
+        li a7, 4
+        ecall                        # print str3
+        ret
+
